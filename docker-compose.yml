@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  email-catcher:
+    build: .
+    container_name: email-catcher
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - TENANT_ID=${TENANT_ID}
+      - EMAIL_ADDRESS=${EMAIL_ADDRESS}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    restart: unless-stopped
