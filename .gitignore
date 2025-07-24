@@ -208,5 +208,5 @@ __marimo__/
 
 # env stuff?
 .env
-/logs
-/data
+logs/
+data/
