@@ -212,4 +212,4 @@ logs/
 data/
 
 # vim
-.swp
+*.swp
