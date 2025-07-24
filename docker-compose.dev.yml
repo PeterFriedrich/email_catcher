@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  email-catcher-dev:
+    build: .
+    container_name: email-catcher-dev
+    env_file:
+      - .env
+    volumes:
+      - .:/app  # This mounts your entire project directory
+    working_dir: /app
+    command: python src/main.py
+    stdin_open: true
+    tty: true

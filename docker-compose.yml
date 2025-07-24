@@ -2,15 +2,16 @@ version: '3.8'
 
 services:
   email-catcher:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile 
     container_name: email-catcher
     environment:
-      - CLIENT_ID=${CLIENT_ID}
-      - CLIENT_SECRET=${CLIENT_SECRET}
-      - TENANT_ID=${TENANT_ID}
-      - EMAIL_ADDRESS=${EMAIL_ADDRESS}
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - .env
     volumes:
+      - ./src:/app/src
       - ./logs:/app/logs
       - ./data:/app/data
-    restart: unless-stopped
+    command: python src/main.py
+    stdin_open: true
+    tty: true
