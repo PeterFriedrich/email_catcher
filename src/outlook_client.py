@@ -63,10 +63,10 @@ class GraphAuthenticator:
             interval = device_info.get('interval', 5)
             expires_in = device_info['expires_in']
 
-            # check for response, handle
+            # request and handle
             for _ in range(0, expires_in, interval):
-                time.sleep(interval)
 
+                time.sleep(interval)
                 token_response = requests.post(token_url, data=poll_data)
 
                 if token_response.status_code == 200:
@@ -74,6 +74,18 @@ class GraphAuthenticator:
                     self.access_token = token_data['access_token']
                     print("Authentication successful!")
                     return True
+
+                elif token_response.status_code == 400:
+                    error = token_response.json().get('error')
+                    if error == "authorization_pending":
+                        print("still waiting...")
+                        continue  # try again
+                    elif error == "authorization_declined":
+                        print("Auth declined by user")
+                        return False
+                    elif error == "expired_token":
+                        print("Code expired")
+                        return False
 
         except Exception as e:
             print(f"Authentication error: {e}")
