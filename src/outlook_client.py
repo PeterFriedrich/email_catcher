@@ -7,6 +7,9 @@ Handles Graph API authentication and operations
 import os
 import requests
 import time
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class GraphAuthenticator:
@@ -38,13 +41,12 @@ class GraphAuthenticator:
             'client_id': self.client_id,
             'scope': read_val + " " + write_val
             }
-        
+
         try:
-            device_response = requests.requests.post(device_code_url,
-                                                     data=device_data)
+            device_response = requests.post(device_code_url, data=device_data)
             device_response.raise_for_status()
             device_info = device_response.json()
-            
+
             # prompt user to complete browser authentication
             print("\n Authentication required:")
             print(f"Go to: {device_info['verification_uri']}")
@@ -64,6 +66,8 @@ class GraphAuthenticator:
             expires_in = device_info['expires_in']
 
             # request and handle
+            print("------------------------")
+            print(f"interval:{interval}, expires_in:{expires_in}")
             for _ in range(0, expires_in, interval):
 
                 time.sleep(interval)
@@ -86,18 +90,28 @@ class GraphAuthenticator:
                     elif error == "expired_token":
                         print("Code expired")
                         return False
+                elif token_response.status_code == 401:
+                    print("401 Unauth")
+                    print(f"Response: {token_response.text}")
+                    return False
+
+                else:
+                    print("Error: printing code")
+                    print(token_response.status_code)
+                    print(f"Response: {token_response.text}")
+                    return False
+
+                print("Authentication timed out")
+                return False
 
         except Exception as e:
             print(f"Authentication error: {e}")
             return False
 
-        return False
-
 
 # basic test
 if __name__ == "__main__":
     auth = GraphAuthenticator()
-    print(auth.client_id)
     if auth.authenticate():
         print("Authentication successful!")
     else:
