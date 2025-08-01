@@ -7,3 +7,7 @@ Basic program for catching emails that end up in my junk folder.
     1. *May require changing page format to old to find this*
 3. Add delegated permissions: Mail.Read, Mail.ReadWrite
 4. Copy CLIENT_ID and TENANT_ID to .env file
+
+### API permissions:
+1. Added Mail.Read, Mail.ReadWrite, and User.Read as permissions
+2. Click "Grant admin consent for Default Directory" button above permissions table.

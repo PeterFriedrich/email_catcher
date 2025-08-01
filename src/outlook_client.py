@@ -7,6 +7,7 @@ Handles Graph API authentication and operations
 import os
 import requests
 import time
+from typing import Dict
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,11 +15,15 @@ load_dotenv()
 
 class GraphAuthenticator:
     """
+    Handles authentication, using device code flow.
+
+    Manages obtaining, storing, and refreshing tokens
+    needed for Microsoft Graph API.
     """
     def __init__(self):
-        # just creates
         self.client_id = os.getenv('CLIENT_ID')
         self.tenant_id = os.getenv('TENANT_ID')
+        self.access_token = None
 
     def authenticate(self):
         """
@@ -108,11 +113,48 @@ class GraphAuthenticator:
             print(f"Authentication error: {e}")
             return False
 
+    def get_headers(self):
+        return {
+                'Authorization': f'Bearer {self.access_token}',
+                'Content-type': 'applications/json'
+                }
+
+
+class GraphAPIClient:
+    """
+    Manages requests to the Microsoft Graph API
+    """
+    def __init__(
+        self,
+        authenticator: GraphAuthenticator,
+        base_url: str = "https://graph.microsoft.com/v1.0"
+    ):
+        self.base_url = base_url
+        self.authenticator = auth
+
+    def get(self, endpoint: str) -> Dict:
+        """Make a GET request to Graph API."""
+        url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        headers = self.authenticator.get_headers()
+
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        return response.json()
+
 
 # basic test
 if __name__ == "__main__":
+    print("---Basic Auth Test---")
     auth = GraphAuthenticator()
     if auth.authenticate():
         print("Authentication successful!")
+
+        # test api client
+        api_client = GraphAPIClient(auth)
+        try:
+            profile = api_client.get("/me")
+            print(f"Api working, hello {profile.get('displayName')}")
+        except Exception as e:
+            print(f"API test failed: {e}")
     else:
         print("Authentication failed")
