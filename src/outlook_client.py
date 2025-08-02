@@ -10,6 +10,8 @@ import time
 from typing import Dict
 from dotenv import load_dotenv
 
+import traceback
+
 load_dotenv()
 
 
@@ -142,9 +144,31 @@ class GraphAPIClient:
         return response.json()
 
 
+class OutlookMailClient:
+    """
+    Performs email specific operations via Graph API
+    """
+
+    def __init__(self, api_client: GraphAPIClient):
+        self.api_client = api_client
+        self._junk_folder_id = None
+
+    def get_mail_folders(self):
+        """
+        Get all mail folders from the user.
+
+        Returns: List of folder objects
+        """
+        mail_folder_url = "/me/mailFolders"
+        response = self.api_client.get(mail_folder_url)
+        return response.get('value', [])
+
+
 # basic test
 if __name__ == "__main__":
-    print("---Basic Auth Test---")
+    print("=== Email Catcher Test ===")
+
+    # auth test
     auth = GraphAuthenticator()
     if auth.authenticate():
         print("Authentication successful!")
@@ -158,3 +182,16 @@ if __name__ == "__main__":
             print(f"API test failed: {e}")
     else:
         print("Authentication failed")
+
+    # outlook client test
+    email_address = os.getenv("EMAIL_ADDRESS")
+    outlook = OutlookMailClient(api_client)
+
+    try:
+        folders = outlook.get_mail_folders()
+        print(f"Found {len(folders)} mail folders:")
+        for folder in folders:
+            print(f" - {folder['displayName']} (ID: {folder['id']})")
+    except Exception as e:
+        print(f"Failed to get folders: {e}")
+        traceback.print_exc()
